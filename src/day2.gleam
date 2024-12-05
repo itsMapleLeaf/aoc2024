@@ -1,32 +1,26 @@
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/string
 import gleam/yielder
-import simplifile
+import solution.{Solution}
 import util
 
-pub fn part1() {
-  let result = reports() |> list.count(is_safe)
-  io.println("Day 2 Part 1: " <> string.inspect(result))
+pub fn solution() {
+  Solution(
+    day: 2,
+    example: "7 6 4 2 1
+1 2 7 8 9
+9 7 6 2 1
+1 3 2 4 5
+8 6 4 4 1
+1 3 6 7 9",
+    part1: fn(input) { input |> parse_input |> list.count(is_safe) },
+    part2: fn(input) { input |> parse_input |> list.count(is_mostly_safe) },
+  )
+  |> solution.print
 }
 
-pub fn part2() {
-  let result = reports() |> list.count(is_mostly_safe)
-  io.println("Day 2 Part 2: " <> string.inspect(result))
-}
-
-fn reports() {
-  let assert Ok(content) = simplifile.read("src/day2.txt")
-
-  // let content =
-  //   "7 6 4 2 1
-  // 1 2 7 8 9
-  // 9 7 6 2 1
-  // 1 3 2 4 5
-  // 8 6 4 4 1
-  // 1 3 6 7 9"
-
+fn parse_input(content: String) {
   content
   |> string.trim
   |> string.split("\n")
