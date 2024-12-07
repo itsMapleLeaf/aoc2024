@@ -2,6 +2,7 @@ import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/option
+import gleam/string
 
 pub fn counts(of values: List(a)) -> dict.Dict(a, Int) {
   list.fold(values, dict.new(), fn(counts, id) {
@@ -19,4 +20,8 @@ pub fn assert_parse_int(input: String) {
     Ok(int) -> int
     Error(_) -> panic as { "invalid int: " <> input }
   }
+}
+
+pub fn lines(text: String) {
+  text |> string.split("\n")
 }
