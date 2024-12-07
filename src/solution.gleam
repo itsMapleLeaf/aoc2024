@@ -40,6 +40,7 @@ pub fn printer(cli_args: List(String)) {
 fn parse_day_arg(arg) {
   case arg {
     "d" <> rest -> int.parse(rest)
+    "p" <> _ -> Error(Nil)
     _ -> panic as { "invalid arg " <> arg }
   }
 }
@@ -50,6 +51,7 @@ fn parse_part_arg(arg) {
     "p2" -> Ok(Part2Solution)
     "p1e" -> Ok(Part1ExampleSolution)
     "p2e" -> Ok(Part2ExampleSolution)
+    "d" <> _ -> Error(Nil)
     _ -> panic as { "invalid arg " <> arg }
   }
 }
