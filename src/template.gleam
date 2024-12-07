@@ -7,5 +7,4 @@ pub fn solution() {
     part1: fn(_input) { "todo" },
     part2: fn(_input) { "todo" },
   )
-  |> solution.print
 }

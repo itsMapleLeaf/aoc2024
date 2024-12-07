@@ -17,7 +17,6 @@ pub fn solution() {
     part1: fn(input) { input |> parse_input |> list.count(is_safe) },
     part2: fn(input) { input |> parse_input |> list.count(is_mostly_safe) },
   )
-  |> solution.print
 }
 
 fn parse_input(content: String) {

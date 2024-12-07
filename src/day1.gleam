@@ -37,7 +37,6 @@ pub fn solution() {
       |> int.sum
     },
   )
-  |> solution.print
 }
 
 fn parse_location_id_lists(content: String) {

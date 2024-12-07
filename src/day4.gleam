@@ -145,5 +145,4 @@ M.M.M.M.M.
       patterns |> count_pattern_matches(in: grid)
     },
   )
-  |> solution.print
 }

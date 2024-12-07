@@ -20,7 +20,6 @@ pub fn solution() {
     },
     part2: interpret,
   )
-  |> solution.print
 }
 
 const mul_instruction_exp_string = "mul\\((\\d{1,3}),(\\d{1,3})\\)"
