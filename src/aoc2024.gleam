@@ -13,4 +13,5 @@ pub fn main() {
   |> solution.print(day2.solution())
   |> solution.print(day3.solution())
   |> solution.print(day4.solution())
+  |> solution.print(day5.solution())
 }
