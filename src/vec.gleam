@@ -2,7 +2,7 @@ import gleam/float
 import gleam/int
 import gleam/yielder.{type Yielder}
 
-pub opaque type Vec {
+pub type Vec {
   Vec(x: Int, y: Int)
 }
 
