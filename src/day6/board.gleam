@@ -1,4 +1,3 @@
-import gleam/option
 import gleam/set.{type Set}
 import gleam/yielder
 import vec.{type Vec}
@@ -58,20 +57,9 @@ pub fn add_obstacle(board: Board, position: Vec) {
 }
 
 pub fn advance(board: Board) -> Board {
-  let obstacles_in_path =
-    board.obstacles
-    |> set.filter(fn(obstacle) {
-      board.direction == vec.sign(vec.subtract(obstacle, board.position))
-    })
-
   let closest_in_path =
-    obstacles_in_path
-    |> set.fold(option.None, fn(current, next) {
-      option.Some(case current {
-        option.None -> next
-        option.Some(current) -> vec.closest(board.position, current, next)
-      })
-    })
+    vec.range(board.position, edge_facing_point(board))
+    |> yielder.find(set.contains(board.obstacles, _))
 
   // util.print_debug("board.position", board.position)
   // util.print_debug("board.direction", board.direction)
@@ -82,10 +70,10 @@ pub fn advance(board: Board) -> Board {
   // io.println("---")
 
   case closest_in_path {
-    option.None -> {
+    Error(_) -> {
       board |> move_to(edge_facing_point(board))
     }
-    option.Some(obstacle_position) -> {
+    Ok(obstacle_position) -> {
       // our new position is one back from the obstacle
       let new_position = obstacle_position |> vec.subtract(board.direction)
 
