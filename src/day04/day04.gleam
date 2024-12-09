@@ -2,7 +2,7 @@ import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/string
-import solution.{Solution}
+import lib/solution.{Solution}
 
 type Position {
   Position(row: Int, col: Int)

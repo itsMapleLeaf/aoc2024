@@ -72,10 +72,12 @@ fn is_enabled(enabled_values: set.Set(a), value: a) {
 pub fn print(printer: SolutionPrinter, solution: Solution(a, b)) {
   use <- bool.guard(!is_enabled(printer.day_filter, solution.day), printer)
 
+  let day_string = solution.day |> int.to_string |> string.pad_start(2, "0")
+
   let assert Ok(input) =
     result.or(
-      simplifile.read("src/day" <> int.to_string(solution.day) <> ".txt"),
-      simplifile.read("src/day" <> int.to_string(solution.day) <> "/input.txt"),
+      simplifile.read("src/day" <> day_string <> ".txt"),
+      simplifile.read("src/day" <> day_string <> "/input.txt"),
     )
 
   let part_rows =

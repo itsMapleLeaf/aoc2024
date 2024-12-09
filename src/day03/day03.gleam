@@ -2,7 +2,7 @@ import gleam/int
 import gleam/list
 import gleam/option.{Some}
 import gleam/regexp.{Match}
-import solution.{Solution}
+import lib/solution.{Solution}
 
 pub fn solution() {
   Solution(

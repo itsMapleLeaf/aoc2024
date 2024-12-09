@@ -1,6 +1,6 @@
 import gleam/set.{type Set}
 import gleam/yielder
-import vec.{type Vec}
+import lib/vec.{type Vec}
 
 pub type Board {
   Board(

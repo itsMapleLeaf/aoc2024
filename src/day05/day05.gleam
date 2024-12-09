@@ -5,8 +5,8 @@ import gleam/option
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
-import solution.{Solution}
-import util
+import lib/solution.{Solution}
+import lib/util
 
 pub fn solution() {
   Solution(

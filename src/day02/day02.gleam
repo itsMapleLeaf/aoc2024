@@ -2,8 +2,8 @@ import gleam/int
 import gleam/list
 import gleam/string
 import gleam/yielder
-import solution.{Solution}
-import util
+import lib/solution.{Solution}
+import lib/util
 
 pub fn solution() {
   Solution(

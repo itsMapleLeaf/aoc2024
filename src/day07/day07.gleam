@@ -4,8 +4,8 @@ import gleam/list
 import gleam/result
 import gleam/string
 import gleam_community/maths/elementary
-import solution
-import util
+import lib/solution
+import lib/util
 
 pub fn solution() {
   solution.Solution(

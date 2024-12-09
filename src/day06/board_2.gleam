@@ -3,8 +3,8 @@ import gleam/list
 import gleam/set.{type Set}
 import gleam/string
 import gleam/yielder
-import util
-import vec.{type Vec}
+import lib/util
+import lib/vec.{type Vec}
 
 pub type Board {
   Board(

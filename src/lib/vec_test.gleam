@@ -1,6 +1,6 @@
 import gleam/yielder
 import gleeunit/should
-import vec
+import lib/vec
 
 pub fn rotate_right_test() {
   vec.rotate_right(vec.down) |> should.equal(vec.left)

@@ -1,11 +1,11 @@
-import day6/board
-import day6/board_2
+import day06/board
+import day06/board_2
 import gleam/list
 import gleam/set
 import gleam/string
-import solution
-import util
-import vec
+import lib/solution
+import lib/util
+import lib/vec
 
 pub fn solution() {
   solution.Solution(

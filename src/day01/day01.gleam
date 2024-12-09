@@ -4,8 +4,8 @@ import gleam/list
 import gleam/regexp
 import gleam/result
 import gleam/string
-import solution.{Solution}
-import util
+import lib/solution.{Solution}
+import lib/util
 
 pub fn solution() {
   Solution(

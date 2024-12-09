@@ -1,6 +1,6 @@
 import gleam/dict
 import gleeunit/should
-import util
+import lib/util
 
 pub fn counts_test() {
   [1, 1, 1, 2, 3, 3]

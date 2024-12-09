@@ -3,7 +3,7 @@ import gleam/int
 import gleam/result
 import gleam/string
 import gleam/yielder.{type Yielder}
-import util
+import lib/util
 
 pub type Vec {
   Vec(x: Int, y: Int)
