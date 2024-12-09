@@ -56,7 +56,7 @@ pub fn add_obstacle(board: Board, position: Vec) {
   )
 }
 
-pub fn advance(board: Board) -> Board {
+pub fn complete_patrol(board: Board) -> Board {
   let edge_point = edge_facing_point(board)
 
   let closest_in_path =
@@ -82,7 +82,7 @@ pub fn advance(board: Board) -> Board {
       board
       |> move_to(new_position)
       |> set_direction(board.direction |> vec.rotate_right)
-      |> advance
+      |> complete_patrol
     }
   }
 }

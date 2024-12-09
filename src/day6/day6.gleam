@@ -1,4 +1,5 @@
 import day6/board
+import day6/board_2
 import gleam/list
 import gleam/set
 import gleam/string
@@ -52,8 +53,13 @@ pub fn solution() {
           })
         })
 
-      board.advance(board).tracks |> set.size
+      let board = board |> board.complete_patrol
+      board.tracks |> set.size
     },
-    part2: fn(input) { 0 },
+    part2: fn(input) {
+      input
+      |> board_2.from_input
+      |> board_2.count_loop_obstructions
+    },
   )
 }
