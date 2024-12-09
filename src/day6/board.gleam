@@ -57,8 +57,10 @@ pub fn add_obstacle(board: Board, position: Vec) {
 }
 
 pub fn advance(board: Board) -> Board {
+  let edge_point = edge_facing_point(board)
+
   let closest_in_path =
-    vec.range(board.position, edge_facing_point(board))
+    vec.range(board.position, edge_point)
     |> yielder.find(set.contains(board.obstacles, _))
 
   // util.print_debug("board.position", board.position)
@@ -66,12 +68,12 @@ pub fn advance(board: Board) -> Board {
   // util.print_debug("board.size", board.size)
   // util.print_debug("obstacles_in_path", obstacles_in_path)
   // util.print_debug("closest_in_path", closest_in_path)
-  // util.print_debug("edge_facing_point", edge_facing_point(board))
+  // util.print_debug("edge_facing_point", edge_point)
   // io.println("---")
 
   case closest_in_path {
     Error(_) -> {
-      board |> move_to(edge_facing_point(board))
+      board |> move_to(edge_point)
     }
     Ok(obstacle_position) -> {
       // our new position is one back from the obstacle
