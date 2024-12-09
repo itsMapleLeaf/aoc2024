@@ -92,3 +92,33 @@ pub fn range_test() {
   points
   |> should.equal([vec.of(0, 0), vec.of(0, 1), vec.of(1, 0), vec.of(1, 1)])
 }
+
+pub fn segment_contains_test() {
+  // Point on the segment
+  vec.segment_contains(#(vec.of(0, 0), vec.of(2, 2)), vec.of(1, 1))
+  |> should.be_true()
+
+  // Point at segment start
+  vec.segment_contains(#(vec.of(0, 0), vec.of(2, 2)), vec.of(0, 0))
+  |> should.be_true()
+
+  // Point at segment end
+  vec.segment_contains(#(vec.of(0, 0), vec.of(2, 2)), vec.of(2, 2))
+  |> should.be_true()
+
+  // Point not on the segment but on the line
+  vec.segment_contains(#(vec.of(0, 0), vec.of(2, 2)), vec.of(3, 3))
+  |> should.be_false()
+
+  // Point not on the line at all
+  vec.segment_contains(#(vec.of(0, 0), vec.of(2, 2)), vec.of(1, 0))
+  |> should.be_false()
+
+  // Vertical segment
+  vec.segment_contains(#(vec.of(1, 0), vec.of(1, 4)), vec.of(1, 2))
+  |> should.be_true()
+
+  // Horizontal segment
+  vec.segment_contains(#(vec.of(0, 1), vec.of(4, 1)), vec.of(2, 1))
+  |> should.be_true()
+}

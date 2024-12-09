@@ -35,6 +35,11 @@ pub fn int_sign(x: Int) {
   }
 }
 
-pub fn print_debug(name: String, value: a) {
+pub fn print_var(name: String, value: a) {
   io.println(name <> " = " <> string.inspect(value))
+}
+
+pub fn debug_var(value: a, name: String) {
+  io.println(name <> " = " <> string.inspect(value))
+  value
 }

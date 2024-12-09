@@ -129,3 +129,11 @@ pub fn range(from start: Vec, to end: Vec) -> Yielder(Vec) {
     yielder.map(yielder.range(start.y, end.y), fn(y) { of(x, y) })
   })
 }
+
+pub fn segment_contains(segment: #(Vec, Vec), point: Vec) {
+  float.loosely_equals(
+    distance(segment.0, point) +. distance(segment.1, point),
+    distance(segment.0, segment.1),
+    0.00001,
+  )
+}
