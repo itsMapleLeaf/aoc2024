@@ -1,5 +1,6 @@
 import gleam/dict
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/option
 import gleam/string
@@ -24,4 +25,16 @@ pub fn assert_parse_int(input: String) {
 
 pub fn lines(text: String) {
   text |> string.split("\n")
+}
+
+pub fn int_sign(x: Int) {
+  case x {
+    x if x < 0 -> -1
+    x if x > 0 -> 1
+    _ -> 0
+  }
+}
+
+pub fn print_debug(name: String, value: a) {
+  io.println(name <> " = " <> string.inspect(value))
 }

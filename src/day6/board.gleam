@@ -1,4 +1,6 @@
+import gleam/option
 import gleam/set.{type Set}
+import gleam/yielder
 import vec.{type Vec}
 
 pub type Board {
@@ -31,6 +33,19 @@ pub fn set_position(board: Board, position: Vec) {
   Board(..board, position:, tracks: set.insert(board.tracks, position))
 }
 
+pub fn move_to(board: Board, destination: Vec) {
+  Board(
+    ..board,
+    position: destination,
+    tracks: set.union(
+      board.tracks,
+      vec.range(board.position, destination)
+        |> yielder.to_list
+        |> set.from_list,
+    ),
+  )
+}
+
 pub fn set_direction(board: Board, direction: Vec) {
   Board(..board, direction:)
 }
@@ -43,24 +58,58 @@ pub fn add_obstacle(board: Board, position: Vec) {
 }
 
 pub fn advance(board: Board) -> Board {
-  let next_position = board.position |> vec.add(board.direction)
-  case board.obstacles |> set.contains(next_position) {
-    True ->
+  let obstacles_in_path =
+    board.obstacles
+    |> set.filter(fn(obstacle) {
+      board.direction == vec.sign(vec.subtract(obstacle, board.position))
+    })
+
+  let closest_in_path =
+    obstacles_in_path
+    |> set.fold(option.None, fn(current, next) {
+      option.Some(case current {
+        option.None -> next
+        option.Some(current) -> vec.closest(board.position, current, next)
+      })
+    })
+
+  // util.print_debug("board.position", board.position)
+  // util.print_debug("board.direction", board.direction)
+  // util.print_debug("board.size", board.size)
+  // util.print_debug("obstacles_in_path", obstacles_in_path)
+  // util.print_debug("closest_in_path", closest_in_path)
+  // util.print_debug("edge_facing_point", edge_facing_point(board))
+  // io.println("---")
+
+  case closest_in_path {
+    option.None -> {
+      board |> move_to(edge_facing_point(board))
+    }
+    option.Some(obstacle_position) -> {
+      // our new position is one back from the obstacle
+      let new_position = obstacle_position |> vec.subtract(board.direction)
+
       board
+      |> move_to(new_position)
       |> set_direction(board.direction |> vec.rotate_right)
       |> advance
-
-    False ->
-      case is_out_of_bounds(board, next_position) {
-        True -> board
-        False -> board |> set_position(next_position) |> advance
-      }
+    }
   }
 }
 
+pub fn contains(board: Board, position: Vec) {
+  position.x >= 0
+  || position.y >= 0
+  || position.x < board.size.x
+  || position.y < board.size.y
+}
+
 pub fn is_out_of_bounds(board: Board, position: Vec) {
-  position.x < 0
-  || position.y < 0
-  || position.x >= board.size.x
-  || position.y >= board.size.y
+  !contains(board, position)
+}
+
+fn edge_facing_point(board: Board) {
+  board.position
+  |> vec.add(vec.multiply(board.direction, board.size))
+  |> vec.clamp(vec.zero, board.size |> vec.subtract(vec.one))
 }
