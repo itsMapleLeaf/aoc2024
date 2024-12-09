@@ -1,3 +1,4 @@
+import gleam/bool
 import gleam/int
 import gleam/io
 import gleam/list
@@ -5,6 +6,7 @@ import gleam/result
 import gleam/set
 import gleam/string
 import simplifile
+import tobble
 
 pub type Solution(a, b) {
   Solution(
@@ -57,46 +59,41 @@ fn parse_part_arg(arg) {
 }
 
 pub fn print(printer: SolutionPrinter, solution: Solution(a, b)) {
-  let Solution(day:, example:, part1:, part2:) = solution
+  use <- bool.guard(!is_enabled(printer.day_filter, solution.day), printer)
 
   let assert Ok(input) =
     result.or(
-      simplifile.read("src/day" <> int.to_string(day) <> ".txt"),
-      simplifile.read("src/day" <> int.to_string(day) <> "/input.txt"),
+      simplifile.read("src/day" <> int.to_string(solution.day) <> ".txt"),
+      simplifile.read("src/day" <> int.to_string(solution.day) <> "/input.txt"),
     )
 
-  printer
-  |> print_day(day, fn() {
-    printer
-    |> print_part(Part1ExampleSolution, "Part 1e", fn() { part1(example) })
-    |> print_part(Part2ExampleSolution, "Part 2e", fn() { part2(example) })
-    |> print_part(Part1Solution, "Part 1", fn() { part1(input) })
-    |> print_part(Part2Solution, "Part 2", fn() { part2(input) })
-  })
-}
+  let part_rows = [
+    #(Part1ExampleSolution, "Part 1e", fn() {
+      string.inspect(solution.part1(solution.example))
+    }),
+    #(Part2ExampleSolution, "Part 2e", fn() {
+      string.inspect(solution.part2(solution.example))
+    }),
+    #(Part1Solution, "Part 1", fn() { string.inspect(solution.part1(input)) }),
+    #(Part2Solution, "Part 2", fn() { string.inspect(solution.part2(input)) }),
+  ]
 
-fn print_day(printer: SolutionPrinter, day: Int, func: fn() -> a) {
-  case is_enabled(printer.day_filter, day) {
-    False -> Nil
-    True -> {
-      io.println("--- Day " <> int.to_string(day) <> " ---")
-      func()
-      Nil
-    }
-  }
-  printer
-}
+  let table =
+    tobble.builder()
+    |> tobble.add_row(["Day " <> int.to_string(solution.day), "Result"])
 
-fn print_part(
-  printer: SolutionPrinter,
-  part: SolutionPart,
-  prefix: String,
-  result: fn() -> a,
-) {
-  case is_enabled(printer.part_filter, part) {
-    False -> Nil
-    True -> io.println(prefix <> ": " <> string.inspect(result()))
-  }
+  let assert Ok(table) =
+    part_rows
+    |> list.fold(table, fn(table, row) {
+      case is_enabled(printer.part_filter, row.0) {
+        False -> table
+        True -> table |> tobble.add_row([row.1, row.2()])
+      }
+    })
+    |> tobble.build()
+
+  io.println(tobble.render(table))
+
   printer
 }
 
