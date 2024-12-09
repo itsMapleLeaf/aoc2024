@@ -6,6 +6,7 @@ import gleam/result
 import gleam/set
 import gleam/string
 import simplifile
+import tempo/duration
 import tobble
 
 pub type Solution(a, b) {
@@ -80,15 +81,16 @@ pub fn print(printer: SolutionPrinter, solution: Solution(a, b)) {
 
   let table =
     tobble.builder()
-    |> tobble.add_row(["Day " <> int.to_string(solution.day), "Result"])
+    |> tobble.add_row(["Day " <> int.to_string(solution.day), "Result", "Time"])
 
   let assert Ok(table) =
     part_rows
+    |> list.filter(fn(row) { is_enabled(printer.part_filter, row.0) })
     |> list.fold(table, fn(table, row) {
-      case is_enabled(printer.part_filter, row.0) {
-        False -> table
-        True -> table |> tobble.add_row([row.1, row.2()])
-      }
+      let timer = duration.start_monotonic()
+      let result = row.2()
+      let duration = duration.since(timer)
+      table |> tobble.add_row([row.1, result, duration])
     })
     |> tobble.build()
 
