@@ -1,5 +1,5 @@
+import gleam/bool
 import gleam/list
-import gleam/option
 import gleam/set.{type Set}
 import gleam/string
 import gleam/yielder
@@ -10,7 +10,6 @@ pub type Board {
   Board(
     size: Vec,
     position: Vec,
-    start_position: Vec,
     direction: Vec,
     obstacles: Set(Vec),
     path: List(PathStop),
@@ -67,51 +66,42 @@ pub fn from_input(input: String) {
     })
     |> set.from_list
 
-  Board(
-    size:,
-    position:,
-    start_position: position,
-    direction:,
-    obstacles:,
-    path: [PathStop(position:, direction:)],
-  )
+  Board(size:, position:, direction:, obstacles:, path: [
+    PathStop(position:, direction:),
+  ])
 }
 
 pub fn count_loop_obstructions(board: Board) {
-  count_loop_obstructions_rec(board, 0)
+  count_loop_obstructions_rec(board, 0, set.new())
 }
 
-fn count_loop_obstructions_rec(board: Board, count: Int) {
+fn count_loop_obstructions_rec(board: Board, count: Int, visited: set.Set(Vec)) {
   let next_position = board.position |> vec.add(board.direction)
+
+  use <- bool.guard(!contains(board, next_position), count)
+
+  use <- bool.lazy_guard(set.contains(board.obstacles, next_position), fn() {
+    let board = Board(..board, direction: board.direction |> vec.rotate_right)
+    count_loop_obstructions_rec(board, count, visited)
+  })
+
+  let next_board = Board(..board, position: next_position)
+
+  use <- bool.lazy_guard(set.contains(visited, next_position), fn() {
+    count_loop_obstructions_rec(next_board, count, visited)
+  })
+
+  let visited = visited |> set.insert(next_position)
 
   let board_with_new_obstruction =
     Board(..board, obstacles: set.insert(board.obstacles, next_position))
 
-  let obstructed_patrol_result = complete_patrol(board_with_new_obstruction)
-
-  let next_board = case board.obstacles |> set.contains(next_position) {
-    True -> {
-      option.Some(
-        Board(..board, direction: board.direction |> vec.rotate_right),
-      )
-    }
-    False -> {
-      case board |> contains(next_position) {
-        True -> option.Some(Board(..board, position: next_position))
-        False -> option.None
-      }
-    }
+  let count = case complete_patrol(board_with_new_obstruction) {
+    Completed -> count
+    Looping -> count + 1
   }
 
-  case next_board, obstructed_patrol_result {
-    option.Some(board), Completed -> {
-      count_loop_obstructions_rec(board, count)
-    }
-    option.Some(board), Looping -> {
-      count_loop_obstructions_rec(board, count + 1)
-    }
-    option.None, _ -> count
-  }
+  count_loop_obstructions_rec(next_board, count, visited)
 }
 
 fn move_to(
