@@ -18,44 +18,54 @@ pub type Solution(a, b) {
   )
 }
 
-pub type SolutionPrinter {
-  SolutionPrinter(day_filter: set.Set(Int), part_filter: set.Set(SolutionPart))
-}
-
-pub type SolutionPart {
-  Part1Solution
-  Part2Solution
-  Part1ExampleSolution
-  Part2ExampleSolution
-}
-
-pub fn printer(cli_args: List(String)) {
+pub opaque type SolutionPrinter {
   SolutionPrinter(
-    day_filter: cli_args
-      |> list.filter_map(parse_day_arg)
-      |> set.from_list,
-    part_filter: cli_args
-      |> list.filter_map(parse_part_arg)
-      |> set.from_list,
+    day_filter: set.Set(Int),
+    part_filter: set.Set(SolutionPart),
+    ugly: Bool,
   )
 }
 
-fn parse_day_arg(arg) {
-  case arg {
-    "d" <> rest -> int.parse(rest)
-    "p" <> _ -> Error(Nil)
-    _ -> panic as { "invalid arg " <> arg }
-  }
+type SolutionPart {
+  Part1
+  Part2
+  Part1Example
+  Part2Example
 }
 
-fn parse_part_arg(arg) {
-  case arg {
-    "p1" -> Ok(Part1Solution)
-    "p2" -> Ok(Part2Solution)
-    "p1e" -> Ok(Part1ExampleSolution)
-    "p2e" -> Ok(Part2ExampleSolution)
-    "d" <> _ -> Error(Nil)
-    _ -> panic as { "invalid arg " <> arg }
+pub fn printer(cli_args: List(String)) {
+  list.fold(
+    cli_args,
+    SolutionPrinter(day_filter: set.new(), part_filter: set.new(), ugly: False),
+    fn(printer, arg) {
+      case arg {
+        "d" <> num -> {
+          let assert Ok(day) = int.parse(num)
+          printer |> with_day(day)
+        }
+        "p1" -> printer |> with_part(Part1)
+        "p2" -> printer |> with_part(Part2)
+        "p1e" -> printer |> with_part(Part1Example)
+        "p2e" -> printer |> with_part(Part2Example)
+        "--ugly" -> SolutionPrinter(..printer, ugly: True)
+        _ -> panic as { "invalid arg " <> arg }
+      }
+    },
+  )
+}
+
+fn with_day(printer: SolutionPrinter, day: Int) {
+  SolutionPrinter(..printer, day_filter: set.insert(printer.day_filter, day))
+}
+
+fn with_part(printer: SolutionPrinter, part: SolutionPart) {
+  SolutionPrinter(..printer, part_filter: set.insert(printer.part_filter, part))
+}
+
+fn is_enabled(enabled_values: set.Set(a), value: a) {
+  case set.size(enabled_values) {
+    0 -> True
+    _ -> enabled_values |> set.contains(value)
   }
 }
 
@@ -68,37 +78,51 @@ pub fn print(printer: SolutionPrinter, solution: Solution(a, b)) {
       simplifile.read("src/day" <> int.to_string(solution.day) <> "/input.txt"),
     )
 
-  let part_rows = [
-    #(Part1ExampleSolution, "Part 1e", fn() {
-      string.inspect(solution.part1(solution.example))
-    }),
-    #(Part2ExampleSolution, "Part 2e", fn() {
-      string.inspect(solution.part2(solution.example))
-    }),
-    #(Part1Solution, "Part 1", fn() { string.inspect(solution.part1(input)) }),
-    #(Part2Solution, "Part 2", fn() { string.inspect(solution.part2(input)) }),
-  ]
-
-  let table =
-    tobble.builder()
-    |> tobble.add_row(["Day " <> int.to_string(solution.day), "Result", "Time"])
-
-  let assert Ok(table) =
-    part_rows
+  let part_rows =
+    [
+      #(Part1Example, "Part 1e", fn() {
+        string.inspect(solution.part1(solution.example))
+      }),
+      #(Part1, "Part 1", fn() { string.inspect(solution.part1(input)) }),
+      #(Part2Example, "Part 2e", fn() {
+        string.inspect(solution.part2(solution.example))
+      }),
+      #(Part2, "Part 2", fn() { string.inspect(solution.part2(input)) }),
+    ]
     |> list.filter(fn(row) { is_enabled(printer.part_filter, row.0) })
-    |> list.fold(table, fn(table, row) {
-      let timer = duration.start_monotonic()
-      let result = row.2()
-      let duration = duration.since(timer)
-      table |> tobble.add_row([row.1, result, duration])
-    })
-    |> tobble.build()
 
-  io.println(tobble.render(table))
+  case printer.ugly {
+    True -> {
+      io.println("--- Day " <> int.to_string(solution.day) <> " ---")
+      list.each(part_rows, fn(row) {
+        let timer = duration.start_monotonic()
+        let result = row.2()
+        let duration = duration.since(timer)
+        io.println(row.1 <> ": " <> result <> " (" <> duration <> ")")
+      })
+    }
+    False -> {
+      let table =
+        tobble.builder()
+        |> tobble.add_row([
+          "Day " <> int.to_string(solution.day),
+          "Result",
+          "Time",
+        ])
+
+      let assert Ok(table) =
+        part_rows
+        |> list.fold(table, fn(table, row) {
+          let timer = duration.start_monotonic()
+          let result = row.2()
+          let duration = duration.since(timer)
+          table |> tobble.add_row([row.1, result, duration])
+        })
+        |> tobble.build()
+
+      io.println(tobble.render(table))
+    }
+  }
 
   printer
-}
-
-fn is_enabled(set: set.Set(a), value: a) {
-  set.is_empty(set) || set.contains(set, value)
 }

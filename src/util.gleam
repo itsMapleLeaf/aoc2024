@@ -27,6 +27,10 @@ pub fn lines(text: String) {
   text |> string.split("\n")
 }
 
+pub fn lines_trimmed(text: String) {
+  text |> string.trim |> lines |> list.map(string.trim)
+}
+
 pub fn int_sign(x: Int) {
   case x {
     x if x < 0 -> -1
