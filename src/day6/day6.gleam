@@ -1,18 +1,13 @@
 import day6/board
-import gleam/dict.{type Dict}
-import gleam/int
-import gleam/io
 import gleam/list
-import gleam/option
-import gleam/result
-import gleam/set.{type Set}
+import gleam/set
 import gleam/string
-import solution.{Solution}
+import solution
 import util
-import vec.{type Vec}
+import vec
 
 pub fn solution() {
-  Solution(
+  solution.Solution(
     day: 6,
     example: "
     ....#.....
