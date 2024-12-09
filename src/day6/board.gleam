@@ -87,17 +87,6 @@ pub fn complete_patrol(board: Board) -> Board {
   }
 }
 
-pub fn contains(board: Board, position: Vec) {
-  position.x >= 0
-  || position.y >= 0
-  || position.x < board.size.x
-  || position.y < board.size.y
-}
-
-pub fn is_out_of_bounds(board: Board, position: Vec) {
-  !contains(board, position)
-}
-
 fn edge_facing_point(board: Board) {
   board.position
   |> vec.add(vec.multiply(board.direction, board.size))

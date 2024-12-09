@@ -1,4 +1,5 @@
 import gleam/list
+import gleam/option
 import gleam/set.{type Set}
 import gleam/string
 import gleam/yielder
@@ -77,28 +78,40 @@ pub fn from_input(input: String) {
 }
 
 pub fn count_loop_obstructions(board: Board) {
-  let assert Completed(completed_board) = complete_patrol(board)
+  count_loop_obstructions_rec(board, 0)
+}
 
-  completed_board.path
-  // the path is constructed from end to start,
-  // so reverse to get a path from the start
-  |> list.reverse
-  // turn the list into segments [(Vec(0, 0), Vec(0, 5)), (Vec(0, 5), Vec(5, 5)), ...]
-  |> list.window_by_2
-  |> list.flat_map(fn(segment) {
-    let #(a, b) = get_path_segment_vectors(segment)
-    vec.range(a, b) |> yielder.drop(1) |> yielder.to_list
-  })
-  |> list.unique
-  |> list.count(fn(point) {
-    let board_with_new_obstruction =
-      Board(..board, obstacles: set.insert(board.obstacles, point))
+fn count_loop_obstructions_rec(board: Board, count: Int) {
+  let next_position = board.position |> vec.add(board.direction)
 
-    case complete_patrol(board_with_new_obstruction) {
-      Completed(..) -> False
-      Looping -> True
+  let board_with_new_obstruction =
+    Board(..board, obstacles: set.insert(board.obstacles, next_position))
+
+  let obstructed_patrol_result = complete_patrol(board_with_new_obstruction)
+
+  let next_board = case board.obstacles |> set.contains(next_position) {
+    True -> {
+      option.Some(
+        Board(..board, direction: board.direction |> vec.rotate_right),
+      )
     }
-  })
+    False -> {
+      case board |> contains(next_position) {
+        True -> option.Some(Board(..board, position: next_position))
+        False -> option.None
+      }
+    }
+  }
+
+  case next_board, obstructed_patrol_result {
+    option.Some(board), Completed -> {
+      count_loop_obstructions_rec(board, count)
+    }
+    option.Some(board), Looping -> {
+      count_loop_obstructions_rec(board, count + 1)
+    }
+    option.None, _ -> count
+  }
 }
 
 fn move_to(
@@ -120,8 +133,15 @@ fn get_edge_facing_point(board: Board) {
   |> vec.clamp(vec.zero, board.size |> vec.subtract(vec.one))
 }
 
+pub fn contains(board: Board, position: Vec) {
+  position.x >= 0
+  && position.y >= 0
+  && position.x < board.size.x
+  && position.y < board.size.y
+}
+
 type PatrolResult {
-  Completed(Board)
+  Completed
   Looping
 }
 
@@ -145,7 +165,7 @@ fn complete_patrol(board: Board) -> PatrolResult {
             ),
           )
         }
-        Error(_) -> Completed(board |> move_to(edge_point, board.direction))
+        Error(_) -> Completed
       }
     }
   }
@@ -157,12 +177,4 @@ fn is_looping(board: Board) {
   |> list.any(fn(stop) {
     stop.position == board.position && stop.direction == board.direction
   })
-}
-
-type PathSegment =
-  #(PathStop, PathStop)
-
-fn get_path_segment_vectors(segment: PathSegment) {
-  let #(a, b) = segment
-  #(a.position, b.position)
 }
