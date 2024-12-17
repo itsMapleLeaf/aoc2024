@@ -7,6 +7,7 @@ import day05/day05
 import day06/day06
 import day07/day07
 import day08/day08
+import day09/day09
 import lib/solution
 
 pub fn main() {
@@ -20,4 +21,5 @@ pub fn main() {
   |> solution.print(day06.solution())
   |> solution.print(day07.solution())
   |> solution.print(day08.solution())
+  |> solution.print(day09.solution())
 }
