@@ -47,3 +47,7 @@ pub fn debug_var(value: a, name: String) {
   io.println(name <> " = " <> string.inspect(value))
   value
 }
+
+pub fn list_map_sum(list: List(a), value_of: fn(a) -> Int) {
+  list.fold(list, 0, fn(total, a) { total + value_of(a) })
+}

@@ -21,6 +21,8 @@ pub const up = Vec(0, -1)
 
 pub const down = Vec(0, 1)
 
+pub const cardinals = [right, down, left, up]
+
 pub fn of(x: Int, y: Int) -> Vec {
   Vec(x:, y:)
 }
