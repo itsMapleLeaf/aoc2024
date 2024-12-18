@@ -8,6 +8,7 @@ import day07/day07
 import day08/day08
 import day09/day09
 import day10/day10
+import day11/day11
 import lib/solution
 
 pub fn run(printer: solution.SolutionPrinter) {
@@ -22,5 +23,6 @@ pub fn run(printer: solution.SolutionPrinter) {
   |> solution.print(day08.solution())
   |> solution.print(day09.solution())
   |> solution.print(day10.solution())
+  |> solution.print(day11.solution())
   Nil
 }
