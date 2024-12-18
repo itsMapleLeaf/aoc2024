@@ -1,11 +1,20 @@
 import argv
+import gleam/http/request
+import gleam/httpc
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/regexp
+import gleam/result
 import gleam/string
+import gleam_community/ansi
+import glenvy/dotenv
+import glenvy/env
 import lib/solution
+import lib/util
 import simplifile
 import solutions
+import spinner
 
 pub fn main() {
   let argv.Argv(arguments:, ..) = argv.load()
@@ -23,16 +32,69 @@ pub fn main() {
 
 const solutions_file = "src/solutions.gleam"
 
+fn fetch_input(day: Int) {
+  use _ <- result.try(dotenv.load() |> result.map_error(string.inspect))
+
+  use session <- result.try(
+    env.get_string("SESSION") |> result.map_error(string.inspect),
+  )
+
+  let url =
+    "https://adventofcode.com/2024/day/" <> int.to_string(day) <> "/input"
+
+  use request <- result.try(
+    request.to(url)
+    |> result.map_error(string.inspect),
+  )
+
+  use response <- result.try(
+    request.set_header(request, "cookie", "session=" <> session)
+    |> httpc.send
+    |> result.map_error(string.inspect),
+  )
+
+  Ok(response.body)
+}
+
 fn generate_day(day: Int) {
   let day_str = int.to_string(day) |> string.pad_start(2, "0")
   let dir = "src/day" <> day_str
   let module_file = dir <> "/day" <> day_str <> ".gleam"
   let input_file = dir <> "/input.txt"
 
-  // Create the new day's files
+  let spinner =
+    spinner.new("Fetching input")
+    |> spinner.with_colour(ansi.blue)
+    |> spinner.start
+
+  let input = case fetch_input(day) {
+    Ok(input) -> {
+      util.assert_ok(regexp.from_string("\\n$"))
+      |> regexp.replace(input, "")
+    }
+    Error(error) -> {
+      io.println_error("Failed to fetch input: " <> error)
+      ""
+    }
+  }
+
+  spinner |> spinner.stop
+
   let assert Ok(_) = simplifile.create_directory_all(dir)
-  let assert Ok(_) = simplifile.write(input_file, "")
-  let assert Ok(_) = simplifile.write(module_file, "import gleam/list
+  io.println("Created " <> dir)
+
+  let assert Ok(_) = simplifile.write(input_file, input)
+  io.println("Saved " <> input_file)
+
+  let assert Ok(_) = simplifile.write(module_file, module_template(day))
+  io.println("Saved " <> module_file)
+
+  let assert Ok(_) = simplifile.write(solutions_file, solutions_template(day))
+  io.println("Saved " <> solutions_file)
+}
+
+fn module_template(day: Int) {
+  "import gleam/list
 import gleam/string
 import lib/solution.{Solution}
 import lib/util
@@ -44,15 +106,16 @@ pub fn solution() {
 }
 
 fn part1(input: String) {
-  todo
+  0
 }
 
 fn part2(input: String) {
-  todo
+  0
 }
-")
+"
+}
 
-  // Generate the entire solutions file
+fn solutions_template(day: Int) {
   let imports =
     list.range(1, day)
     |> list.map(fn(d) {
@@ -69,23 +132,13 @@ fn part2(input: String) {
     })
     |> string.join("\n")
 
-  let new_content =
-    [
-      imports,
-      "import lib/solution",
-      "",
-      "pub fn run(printer: solution.SolutionPrinter) {",
-      "  printer",
-      solution_calls,
-      "  Nil",
-      "}",
-      "",
-    ]
-    |> string.join("\n")
+  imports <> "
+import lib/solution
 
-  let assert Ok(_) = simplifile.write(solutions_file, new_content)
-
-  io.println("Generated " <> module_file)
-  io.println("Generated " <> input_file)
-  io.println("Updated " <> solutions_file)
+pub fn run(printer: solution.SolutionPrinter) {
+  printer
+" <> solution_calls <> "
+  Nil
+}
+"
 }
